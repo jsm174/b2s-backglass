@@ -1,0 +1,66 @@
+name: b2s-backglass
+on:
+  push:
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: B2S_ScreenResIdentifier
+            slnPath: b2s_screenresidentifier/B2S_ScreenResIdentifier.sln
+            projectPath: b2s_screenresidentifier/b2s_screenresidentifier
+            output: bin/x64
+
+          - name: B2SBackglassDesigner
+            slnPath: b2sbackglassdesigner/B2SBackglassDesigner.sln
+            projectPath: b2sbackglassdesigner/b2sbackglassdesigner
+            output: bin/x64
+
+          - name: B2SBackglassServer
+            slnPath: b2sbackglassserver/B2SBackglassServer.sln
+            projectPath: b2sbackglassserver/b2sbackglassserver
+            output: bin
+
+          - name: B2SBackglassServerEXE
+            slnPath: b2sbackglassserverexe/B2SBackglassServerEXE.sln
+            projectPath: b2sbackglassserverexe/b2sbackglassserverexe
+            output: bin
+
+          - name: B2SBackglassServerRegisterApp
+            slnPath: b2sbackglassserverregisterapp/B2SBackglassServerRegisterApp.sln
+            projectPath: b2sbackglassserverregisterapp/b2sbackglassserverregisterapp
+            output: bin/x64
+
+          - name: BetterLed
+            slnPath: leds/BetterLed/BetterLed.sln
+            projectPath: leds/BetterLed
+            output: bin
+
+          - name: Dream7Display
+            slnPath: leds/dream7segments/Dream7Display.sln
+            projectPath: leds/dream7segments
+            output: bin
+    steps:
+      - uses: microsoft/setup-msbuild@v1.1
+      - uses: actions/checkout@v3
+      - id: version
+        name: Update AssemblyInformationalVersion
+        run: | 
+          ASSEMBLY_INFO="${{ matrix.projectPath }}/My Project/AssemblyInfo.vb"
+          VERSION=$(grep -Eo "AssemblyVersion\(.*\)" "${ASSEMBLY_INFO}" | grep -Eo "[0-9\.]+" | tail -1)
+          SHA7="${GITHUB_SHA::7}"
+          TAG="${VERSION}-${SHA7}"
+          perl -i -pe"s/AssemblyInformationalVersion\(\".*\"\)/AssemblyInformationalVersion\(\"${TAG}\"\)/g" "${ASSEMBLY_INFO}"
+          echo "::set-output name=tag::${TAG}"
+        shell: bash
+      - name: Building ${{ matrix.name }}
+        run: |
+          msbuild ${{ matrix.slnPath }} /t:Rebuild /p:Configuration=Release
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}-${{ steps.version.outputs.tag }}
+          path: ${{ matrix.projectPath }}/${{ matrix.output }}/Release
