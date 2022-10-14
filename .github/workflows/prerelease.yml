@@ -20,8 +20,8 @@ jobs:
         run: |
            SHA=$(if [[ "${{ github.event.inputs.sha }}" ]]; then echo "${{ github.event.inputs.sha }}"; else echo "${GITHUB_SHA}"; fi)
            SHA7="${SHA::7}"
-           echo "::set-output name=sha::${SHA}"
-           echo "::set-output name=sha7::${SHA7}"
+           echo "sha=${SHA}" >> $GITHUB_OUTPUT
+           echo "sha7=${SHA7}" >> $GITHUB_OUTPUT
 
   prerelease:
     runs-on: ubuntu-latest
