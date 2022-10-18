@@ -93,6 +93,18 @@ jobs:
         with:
          name: B2SBackglassServer-${{ steps.version.outputs.tag }}-${{ matrix.config }}-win-${{ matrix.platform }}
          path: tmp
+      - uses: actions/upload-artifact@v3
+        with:
+         name: B2SBackglassServer-${{ steps.version.outputs.tag }}-${{ matrix.config }}-win-${{ matrix.platform }}-compile-server
+         path: b2sbackglassserver
+      - uses: actions/upload-artifact@v3
+        with:
+         name: B2SBackglassServer-${{ steps.version.outputs.tag }}-${{ matrix.config }}-win-${{ matrix.platform }}-compile-serverexe
+         path: b2sbackglassserverexe
+      - uses: actions/upload-artifact@v3
+        with:
+         name: B2SBackglassServer-${{ steps.version.outputs.tag }}-${{ matrix.config }}-win-${{ matrix.platform }}-compile-serverregisterapp
+         path: b2sbackglassserverregisterapp
 
   build-designer:
     name: Build B2SBackglassDesigner-${{ matrix.config }}-win-${{ matrix.platform }}
